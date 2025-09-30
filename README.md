@@ -350,6 +350,15 @@ Las contribuciones son bienvenidas. Por favor:
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
+## 🤝 Colaboradores
+
+- **Dr. Gabriel Enrique Euan Valle** – Universidad Modelo  
+  📧 geuan@modelo.edu.mx  
+
+- **MIQ. Anna Carolina Taboada Peniche** – Universidad Modelo  
+  📧 anna.taboada@modelo.edu.mx  
+
+
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo `LICENSE` para más detalles.
