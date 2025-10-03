@@ -38,6 +38,7 @@ Este sistema permite realizar experimentos controlados de compresión y expansi�
 | **BTS7960 43A** | H-Bridge doble canal | Control bidireccional del actuador |
 | **Actuador Lineal DC** | 12/24V, carrera variable | Compresión/expansión mecánica |
 | **MPX5700AP** | Sensor de presión absoluta 15-700 kPa | Medición de presión del gas |
+| **MAX6675** | Módulo termopar tipo K | Medición de temperatura del gas |
 
 ### Alimentación
 
@@ -51,7 +52,9 @@ Este sistema permite realizar experimentos controlados de compresión y expansi�
   - 0.1 µF (cerámico) - filtrado de alta frecuencia
   - 10 µF (electrolítico) - estabilización de voltaje
 - Válvulas neumáticas (conexión entre jeringa y sensores)
-- Jeringa de volumen calibrado
+- Jeringa de volumen calibrado (60-200ml)
+- Termopar Tipo K para medición de temperatura
+- Tubos neumáticos y conectores
 
 ## 📊 Características del Sensor MPX5700AP
 
@@ -97,6 +100,18 @@ Presión (kPa) = ((Vout - 0.2) × (700 - 0)) / (4.7 - 0.2) + 0
 
 **Importante**: Colocar capacitores de desacoplo (0.1µF y 10µF) entre Vcc y GND del sensor, lo más cerca posible del chip.
 
+### Arduino ↔ MAX6675 (Termopar)
+
+| Arduino | MAX6675 | Función |
+|---------|---------|---------|
+| Pin 52 (SCK) | SCK | Clock SPI |
+| Pin 50 (MISO) | SO | Data Out |
+| Pin 53 (SS) | CS | Chip Select |
+| 5V | VCC | Alimentación |
+| GND | GND | Tierra común |
+
+**Termopar Tipo K**: Conectar a los terminales del módulo MAX6675
+
 ## 🖥️ Software
 
 ### Requisitos Python
@@ -137,7 +152,14 @@ proyecto-termodinamica/
    cd termodinamica/primeraley
    ```
 
-2. **Cargar código en Arduino**:
+2. **Instalar librería MAX6675**:
+   ```
+   Arduino IDE → Tools → Manage Libraries
+   Buscar: "MAX6675"
+   Instalar: "MAX6675 library by Adafruit"
+   ```
+
+3. **Cargar código en Arduino**:
    ```bash
    # Abrir arduino/control_actuador.ino en Arduino IDE
    # Seleccionar placa: Arduino Mega 2560
@@ -176,11 +198,11 @@ Ejemplo:
 
 Estructura del CSV:
 ```csv
-Timestamp,Presion (kPa),Tipo
+Timestamp,Presion (kPa),Temperatura (C),Tipo
 ,,extension
-Timestamp,Presion (kPa)
-2024-09-30 14:30:52.123,125.5
-2024-09-30 14:30:52.623,130.2
+Timestamp,Presion (kPa),Temperatura (C)
+2024-09-30 14:30:52.123,125.5,24.3
+2024-09-30 14:30:52.623,130.2,24.8
 ...
 ```
 
@@ -340,6 +362,16 @@ termodinamica/
 - [ ] Exportación de datos en formato HDF5
 - [ ] Sistema de control remoto
 
+## 🤝 Colaboradores
+
+- **Dr. Gabriel Enrique Euan Valle** – Universidad Modelo  
+  📧 geuan@modelo.edu.mx  
+
+- **MIQ. Anna Carolina Taboada Peniche** – Universidad Modelo  
+  📧 anna.taboada@modelo.edu.mx
+
+---
+
 ## 👥 Contribuciones
 
 Las contribuciones son bienvenidas. Por favor:
@@ -349,15 +381,6 @@ Las contribuciones son bienvenidas. Por favor:
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
-
-## 🤝 Colaboradores
-
-- **Dr. Gabriel Enrique Euan Valle** – Universidad Modelo  
-  📧 geuan@modelo.edu.mx  
-
-- **MIQ. Anna Carolina Taboada Peniche** – Universidad Modelo  
-  📧 anna.taboada@modelo.edu.mx  
-
 
 ## 📄 Licencia
 
