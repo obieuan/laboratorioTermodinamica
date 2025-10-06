@@ -86,11 +86,14 @@ Para **cada uno de los 10 datasets**, calcula:
 
 #### Paso 1.3: Identificación de valores atípicos
 
-1. **Calcula el rango intercuartílico (IQR)** para la presión de cada dataset [INFO AQUI ](https://docs.oracle.com/cloud/help/es/pbcs_common/PFUSU/insights_metrics_IQR.htm#PFUSU-GUID-CF37CAEA-730B-4346-801E-64612719FF6B)
-2. **Identifica outliers** usando el criterio: valores fuera de [Q1 - 1.5×IQR, Q3 + 1.5×IQR]
-3. **Documenta** cuántos outliers encontraste y en qué datasets
+Usa el método de **desviaciones estándar** (Z-score):
 
-💡 **Tip**: Puedes usar `df.quantile([0.25, 0.75])` para calcular cuartiles.
+1. Para cada dataset, calcula la media (μ) y desviación estándar (σ) de la presión
+2. Un valor es atípico si está fuera del rango: [μ - 3σ, μ + 3σ]
+3. Documenta cuántos outliers encontraste y en qué datasets
+
+💡 **Regla práctica**: En una distribución normal, 99.7% de los datos 
+están dentro de ±3 desviaciones estándar de la media.
 
 #### Paso 1.4: Visualizaciones requeridas
 
@@ -108,7 +111,8 @@ Crea las siguientes gráficas usando `matplotlib` o `seaborn`:
 
 5. **Series de tiempo** para 3 datasets representativos:
    - Presión vs Tiempo
-   - Temperatura vs Tiempo
+   - Temperatura vs Tiempo (OPCIONAL - solo si quieres justificar 
+     visualmente que el proceso fue cuasi-isotérmico)
    - Usa subplots para mejor comparación
 
 💡 **Tip para Google Colab**: Usa `%matplotlib inline` y `plt.figure(figsize=(12,6))` para gráficas más grandes.
@@ -298,18 +302,40 @@ Donde D = 46 mm = 0.046 m
 
 #### Paso 5.2: Cálculo del trabajo
 
-Para cada dataset, calcula el trabajo realizado sobre el gas usando:
+Dado que el proceso fue aproximadamente **isotérmico** (ΔT ≈ 1°C), 
+usamos la fórmula termodinámica para trabajo en proceso isotérmico:
 
-**W ≈ P̄ × A × xₘₐₓ**
+**Para proceso isotérmico:**
+
+W = P·V·ln(V_final/V_inicial)
 
 Donde:
-- P̄ = presión promedio (conviértela a Pa = kPa × 1000)
-- A = área en m²
-- xₘₐₓ = desplazamiento máximo (conviértelo a m)
+- P = presión durante el proceso (puedes usar la presión promedio)
+- V_inicial = A × x_max (volumen inicial)
+- V_final ≈ A × 0 (volumen final, aproximadamente cero)
 
-El resultado estará en **Joules (J)**.
+**Problema:** ln(0) no está definido, así que usamos una aproximación:
+V_final ≈ A × 0.001 m (1 mm residual)
 
-💡 **Tip**: Esta es una aproximación simplificada. En realidad, W = ∫P dV, pero la fórmula simplificada es adecuada para este proyecto.
+**Fórmula práctica:**
+
+W ≈ P_promedio × A × x_max × ln(x_max/0.001)
+
+Donde:
+- P_promedio en Pa (kPa × 1000)
+- A en m²
+- x_max en m
+
+El resultado está en **Joules (J)**.
+
+💡 **Alternativa simplificada** (si la fórmula logarítmica es compleja):
+
+W ≈ P_promedio × ΔV
+
+Donde ΔV = A × x_max
+
+Esta aproximación asume presión constante (válida si la variación 
+de presión es pequeña comparada con la presión promedio).
 
 #### Paso 5.3: Tabla de resultados de trabajo
 
@@ -327,16 +353,15 @@ Supón las siguientes **incertidumbres instrumentales**:
 - Desplazamiento: σₓ = ±0.1 mm
 - Diámetro: σ_D = ±0.05 mm
 
-**Propaga el error** usando la fórmula de propagación de incertidumbres para W = P̄ × A × x:
+La incertidumbre relativa aproximada del trabajo es:
 
-**σ²_W = (∂W/∂P)² σ²ₚ + (∂W/∂x)² σ²ₓ + (∂W/∂D)² σ²_D**
+σ_W/W ≈ √[(0.01%)² + (1%)² + (2×0.2%)²] ≈ 1%
 
-Las derivadas parciales son:
-- ∂W/∂P = A × x
-- ∂W/∂x = P̄ × A
-- ∂W/∂D = P̄ × x × (πD/2)
+Entonces: σ_W ≈ 0.01 × W
 
-💡 **Tip**: Calcula numéricamente o usa las fórmulas. También puedes usar la desviación estándar de P en lugar de la incertidumbre instrumental para tener una estimación más realista.
+💡 Esta es una aproximación. La incertidumbre real requiere 
+cálculo más avanzado (derivadas parciales) que verán en 
+cursos posteriores.
 
 #### Paso 5.5: Intervalo de confianza del 95%
 
@@ -350,15 +375,6 @@ Reporta:
 |---------|-------|---------|-----------------|-----------------|
 | 1       | ...   | ...     | ...             | ...             |
 
-#### Paso 5.6: Análisis de sensibilidad
-
-Calcula qué porcentaje de la incertidumbre total aporta cada variable:
-
-```
-Contribución_P = [(∂W/∂P × σₚ)² / σ²_W] × 100%
-Contribución_x = [(∂W/∂x × σₓ)² / σ²_W] × 100%
-Contribución_D = [(∂W/∂D × σ_D)² / σ²_W] × 100%
-```
 
 ### 💬 Preguntas de análisis
 
@@ -507,14 +523,15 @@ Redacta una sección de conclusiones (1-2 páginas) que responda a las siguiente
 
 | Etapa | Ponderación | Criterios específicos |
 |-------|-------------|----------------------|
-| **1. Descriptiva** | 20 pts | Tabla resumen completa y correcta (5), visualizaciones claras y apropiadas (8), análisis de outliers (4), interpretación razonada (3) |
+| **1. Descriptiva** | 20 pts | Tabla resumen completa y correcta (5), visualizaciones claras y apropiadas (8), análisis de outliers con Z-score (4), interpretación razonada (3) |
 | **2. Correlación** | 15 pts | Cálculo correcto de los 3 coeficientes (6), interpretación de p-values (3), discusión física (3), tabla resumen (3) |
-| **3. Regresión P-T** | 20 pts | Modelos correctamente ajustados (6), visualizaciones con líneas de ajuste (5), prueba de normalidad de pendientes (4), interpretación estadística (3), discusión física (2) |
+| **3. Regresión P-T** | 25 pts | Modelos correctamente ajustados (8), visualizaciones con líneas de ajuste (6), análisis de consistencia de pendientes con CV (5), interpretación estadística (4), discusión física (2) |
 | **4. Análisis P-t** | 15 pts | Cálculo de tasas de compresión (6), comparación entre datasets (5), interpretación (4) |
-| **5. Trabajo e incertidumbre** | 20 pts | Cálculo correcto de trabajo (5), propagación de errores bien ejecutada (8), intervalos de confianza (4), análisis de sensibilidad (3) |
+| **5. Trabajo e incertidumbre** | 15 pts | Cálculo correcto de trabajo con fórmula apropiada (8), estimación de incertidumbre simplificada (5), interpretación de resultados (2) |
 | **6. Simulación e inferencia** | 15 pts | Simulación correcta (3), re-análisis completo (5), cálculo de ΔU y Q (4), interpretación termodinámica (3) |
 | **7. Conclusiones** | 10 pts | Claridad y coherencia (3), profundidad del análisis (3), pensamiento crítico (2), redacción técnica (2) |
 | **Presentación general** | -5 pts | Código limpio y comentado, organización lógica, gráficas con etiquetas, sin errores de ejecución |
+| **TOTAL** | **115 pts** | (equivale a 110 después de presentación) |
 
 ### Escala de calificación:
 - **100-110 pts**: Excelente (10) - Análisis profundo, interpretación sofisticada
