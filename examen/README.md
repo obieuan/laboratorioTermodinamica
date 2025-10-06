@@ -8,7 +8,7 @@ Aplicar herramientas de probabilidad y estadística para analizar datos experime
 
 ## 📂 Datos Experimentales Proporcionados
 
-Se les entregarán **9 datasets** (archivos CSV) con las siguientes columnas:
+Se les entregarán **10 datasets** (archivos CSV) con las siguientes columnas:
 
 - **Timestamp** - Marca temporal de cada medición
 - **Presion (kPa)** - Presión registrada en kilopascales
