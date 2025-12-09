@@ -1,0 +1,2 @@
+Timestamp,Tiempo_Relativo_s,Estado_Sistema,Temp1_C,Temp2_C,Temp3_C,Caudal1_Lmin,Caudal2_Lmin,Volumen1_L,Volumen2_L,PWM1,PWM2,Duty1_%,Duty2_%,Modo1,Modo2,Error1,Error2
+2025-12-08 16:46:25.759,1.606,DETENIDO,23.5,32.0,13.0,0.0,0.0,0.0,0.0,200,180,78.4,70.6,MANUAL,MANUAL,--,--
